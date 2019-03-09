@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
   before_action :validate_signature
 
   def validate_signature
+    return if action_name == "index"
     body = request.body.read
     signature = request.env['HTTP_X_LINE_SIGNATURE']
     unless client.validate_signature(body, signature)
