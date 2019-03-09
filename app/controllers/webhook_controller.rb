@@ -1,5 +1,9 @@
 class WebhookController < ApplicationController
 
+  def ruang_depan
+    render plain: "Tidak ada apa apa disini. Silahkan kembali"
+  end
+
   def callback
     body = request.body.read
     events = client.parse_events_from(body)

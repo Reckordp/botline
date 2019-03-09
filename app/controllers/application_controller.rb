@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
     body = request.body.read
     signature = request.env['HTTP_X_LINE_SIGNATURE']
     unless client.validate_signature(body, signature)
-      error 400 { 'Bad Request' }
+      render plain: "#{ActionController::BadRequest} 'Bad Request'"
     end
   end
 
@@ -17,5 +17,6 @@ class ApplicationController < ActionController::Base
     @client ||= Line::Bot::Client.new do |config|
       config.channel_secret = ENV['LINE_CHANNEL_SECRET']
       config.channel_token = ENV['LINE_CHANNEL_TOKEN']
+    end
   end
 end
