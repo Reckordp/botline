@@ -26,7 +26,7 @@ module PesanBalasan
         balasan(:ok)
       else
         if DAFTAR_BALASAN.key?(pesan.message['text'])
-          DAFTAR_BALASAN[pesan.message['text']]
+          ambil_balasan(pesan.message['text'])
         else
           ambil_balasan(:bingung)
         end
