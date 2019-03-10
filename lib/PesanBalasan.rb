@@ -15,18 +15,18 @@ module PesanBalasan
       when /^[Pp]*[u]?ny[a]?/
         kepunyaan(pesan)
       when /^[Nn][a]?mamu\?$/
-        balasan(:nama)
+        ambil_balasan(:nama)
       when /^[Uu]m[u]?rmu\?$/
-        balasan(:umur)
+        ambil_balasan(:umur)
       when /^[Kk][a]?p[a]?n l[a]?hir\?$/
-        balasan(:umur)
+        ambil_balasan(:umur)
       when /^([\w\s]+) j[a]?w[a]?bny[a]? ([\w\,\s]+)$/
         DAFTAR_BALASAN[$1] = $2.split(',')
       else
         if DAFTAR_BALASAN.key?(pesan.message['text'])
           DAFTAR_BALASAN[pesan.message['text']]
         else
-          balasan(:bingung)
+          ambil_balasan(:bingung)
         end
       end
     end
@@ -34,9 +34,9 @@ module PesanBalasan
     def kepunyaan(pesan)
       case pesan.message['text']
       when /n[a]?ma[\?]?$/
-        sprintf("%s, %s", balasan(:nanya), balasan(:nama))
+        sprintf("%s, %s", ambil_balasan(:nanya), ambil_balasan(:nama))
       when /um[u]?r\?$/
-        sprintf("%s, %s", balasan(:nanya), balasan(:umur))
+        sprintf("%s, %s", ambil_balasan(:nanya), ambil_balasan(:umur))
       end
     end
 
