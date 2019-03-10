@@ -25,7 +25,7 @@ module PesanBalasan
 
     def ambil_balasan(jenis)
       DAFTAR_BALASAN[:sblm] = jenis
-      jawaban = balasan(:sblm)
+      jawaban = balasan(jenis)
       return jawaban[rand jawaban.size]
     end
 
