@@ -5,7 +5,8 @@ module PesanBalasan
       :nanya            =>      ["Punya", "Ada", "Iya"],
       :nama             =>      ["nama saya Zakira", "Zakira", "Panggil aja Zakira"],
       :bingung          =>      ["Gak ada enviromentnya..."],
-      :umur             =>      ["Lahirku 10 Maret 2019"]
+      :umur             =>      ["Lahirku 10 Maret 2019"],
+      :ok               =>      "OK"
     }
 
     def buat_balasan(pesan)
@@ -22,9 +23,10 @@ module PesanBalasan
         ambil_balasan(:umur)
       when /^([\w\s]+) j[a]?w[a]?bny[a]? ([\w\,\s]+)$/
         DAFTAR_BALASAN[$1] = $2.split(',')
+        balasan(:ok)
       else
         if DAFTAR_BALASAN.key?(pesan.message['text'])
-          DAFTAR_BALASAN[pesan.message['text']]
+          ambil_balasan(pesan.message['text'])
         else
           ambil_balasan(:bingung)
         end
