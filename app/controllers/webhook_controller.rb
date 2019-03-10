@@ -1,12 +1,8 @@
 class WebhookController < ApplicationController
-  def initialize
-    @balasan = PesanBalasan.new
-  end
-
   def menerima_pesan(pesan)
     case pesan.type
     when Line::Bot::Event::MessageType::Text
-      balas_pesan(pesan, @balasan.buat_balasan(pesan))
+      balas_pesan(pesan, PesanBalasan.buat_balasan(pesan))
     when Line::Bot::Event::MessageType::Sticker
       menerima_stiker(pesan)
     end
