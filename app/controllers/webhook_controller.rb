@@ -53,7 +53,7 @@ class WebhookController < ApplicationController
       end
     end
 
-    render plain: "OK"
+    "OK"
   end
 
   def callback_text
