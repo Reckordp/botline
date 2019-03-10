@@ -7,8 +7,8 @@ class ApplicationController < ActionController::Base
   def validate_signature
     body = request.body.read
     signature = request.env['HTTP_X_LINE_SIGNATURE']
-    unless client.validate_signature(body, signature)
-      render plain: "Session tidak valid", layout: false unless action_name == "index"
+    if action_name != "index" && !client.validate_signature(body, signature)
+      render plain: "Bad request", status: 400
     end
   end
 

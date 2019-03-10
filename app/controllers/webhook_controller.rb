@@ -20,4 +20,8 @@ class WebhookController < ApplicationController
 
     "OK"
   end
+
+  def callback_text
+    render plain: "Gunakan POST!"
+  end
 end
