@@ -23,10 +23,10 @@ module PesanBalasan
         ambil_balasan(:umur)
       when /^([\w\s]+) j[a]?w[a]?bny[a]? ([\w\,\s]+)$/
         DAFTAR_BALASAN[$1] = $2.split(',')
+        balasan(:ok)
       else
         if DAFTAR_BALASAN.key?(pesan.message['text'])
           DAFTAR_BALASAN[pesan.message['text']]
-          balasan(:ok)
         else
           ambil_balasan(:bingung)
         end
