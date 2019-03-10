@@ -22,6 +22,7 @@ class WebhookController < ApplicationController
         stickerId: pesan.message['stickerId']
       )
       balas_konten(pesan, messages)
+    end
   end
 
   def balas_pesan(pesan, tulisan)
@@ -29,7 +30,7 @@ class WebhookController < ApplicationController
   end
 
   def balas_konten(pesan, konten)
-    res = client.reply_message(event['replyToken'], konten)
+    client.reply_message(event['replyToken'], konten)
   end
 
   def callback
