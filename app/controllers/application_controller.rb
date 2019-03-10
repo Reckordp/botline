@@ -1,3 +1,5 @@
+require "line/bot"
+
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :null_session
   before_action :validate_signature
@@ -6,7 +8,7 @@ class ApplicationController < ActionController::Base
     body = request.body.read
     signature = request.env['HTTP_X_LINE_SIGNATURE']
     unless client.validate_signature(body, signature)
-      render plain: "Session tidak valid" unless action_name == "index"
+      render plain: "Session tidak valid", layout: false unless action_name == "index"
     end
   end
 
