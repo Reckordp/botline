@@ -36,7 +36,7 @@ module PesanBalasan
       when /n[a]?ma[\?]?$/
         sprintf("%s, %s", balasan(:nanya), balasan(:nama))
       when /um[u]?r\?$/
-        sprintf(%s, %s, balasan(:nanya), balasan(:umur))
+        sprintf("%s, %s", balasan(:nanya), balasan(:umur))
       end
     end
 
