@@ -1,6 +1,8 @@
 require_relative 'boot'
 
 require 'rails/all'
+require_relative "../lib/PesanBalasan"
+require "line/bot"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
