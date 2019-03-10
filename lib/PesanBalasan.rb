@@ -5,7 +5,8 @@ module PesanBalasan
       :nanya            =>      ["Punya", "Ada", "Iya"],
       :nama             =>      ["nama saya Zakira", "Zakira", "Panggil aja Zakira"],
       :bingung          =>      ["Gak ada enviromentnya..."],
-      :umur             =>      ["Lahirku 10 Maret 2019"]
+      :umur             =>      ["Lahirku 10 Maret 2019"],
+      :ok               =>      "OK"
     }
 
     def buat_balasan(pesan)
@@ -25,6 +26,7 @@ module PesanBalasan
       else
         if DAFTAR_BALASAN.key?(pesan.message['text'])
           DAFTAR_BALASAN[pesan.message['text']]
+          balasan(:ok)
         else
           ambil_balasan(:bingung)
         end
