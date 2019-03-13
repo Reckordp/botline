@@ -94,7 +94,7 @@ class WebhookController < ApplicationController
       :type     =>  'text',
       :text     =>  res.body
     }
-    client.reply_message(tugas.user_id, balasan)
+    client.push_message(tugas.user_id, balasan)
     tugas.ulangi
   end
 

@@ -11,7 +11,7 @@ module PesanBalasan
   Dialog = "Dialog"
   Grup = "Grup"
   Tugas = "Daftar Tugas"
-  
+
   class << self
     def persiapan
       bentuk_dialog = Ingatan::BentukPartikelRancangan.new
@@ -26,7 +26,7 @@ module PesanBalasan
 
       bentuk_tugas = Ingatan::BentukPartikelRancangan.new
       bentuk_dialog.tambah_jenis(:user_id, :string)
-      bentuk_tugas.tambah_jenis(:tugas, :string)
+      bentuk_dialog.tambah_jenis(:tugas, :string)
       Ingatan.buat_rancangan(Tugas, bentuk_tugas)
     end
 
