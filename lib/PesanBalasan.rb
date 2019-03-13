@@ -25,6 +25,7 @@ module PesanBalasan
       Ingatan.buat_rancangan(Grup, bentuk_grup)
 
       bentuk_tugas = Ingatan::BentukPartikelRancangan.new
+      bentuk_dialog.tambah_jenis(:user_id, :string)
       bentuk_tugas.tambah_jenis(:tugas, :string)
       Ingatan.buat_rancangan(Tugas, bentuk_tugas)
     end
@@ -65,7 +66,7 @@ module PesanBalasan
     def perintah(pengirim, pesan)
       case pesan
       when /TK\: DT/, /[Uu]pda?te?/, /[Pp]e?ba?ru?i?/, /[Bb]e?ri?ta?/, /[Ww]e?bsi?t?e?/
-        tambah_tugas(:website)
+        tambah_tugas(pengirim.nomorinduk, :website)
         "Aku tanya dulu..."
       when /(.+) jawaba?n?nya (.+)/
         tambah_enviroment(pengirim, $1, $2)
@@ -115,8 +116,9 @@ module PesanBalasan
       return false
     end
 
-    def tambah_tugas(nama_tugas)
+    def tambah_tugas(user_id, nama_tugas)
       selesai = ambil_bagian_kosong(Tugas) { |bagian| bagian.tugas.empty? }
+      selesai.user_id = user_id
       selesai.tugas = nama_tugas.to_s
       selesai.ubah_data
       return true
