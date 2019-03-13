@@ -30,7 +30,7 @@ class WebhookController < ApplicationController
   end
 
   def balas_konten(pesan, konten)
-    client.reply_message(pesan['replyToken'], konten)
+    client.push_message(pesan['replyToken'], konten)
   end
 
   def pengelola_pesan(permintaan)
