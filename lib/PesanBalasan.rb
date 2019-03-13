@@ -126,8 +126,8 @@ module PesanBalasan
 
       bag = ambil_bagian_kosong(Dialog) { |bagian| bagian.user_id.empty? }
       bag.user_id = pengirim.nomorinduk
-      bag.tanya = tanya
-      bag.jawab = gumpalan_jawab
+      bag.pertanyaan = tanya
+      bag.jawaban = gumpalan_jawab
       bag.ubah_data
       return true
     end
