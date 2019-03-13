@@ -38,8 +38,8 @@ class WebhookController < ApplicationController
     case permintaan.pesan
     when PenguraiEventLine::Pengurai::Message::Text
       balasan = {
-        type:     =>  'text',
-        text:     =>  PesanBalasan.balas(pengirim, permintaan.pesan.tulisan)
+        :type     =>  'text',
+        :text     =>  PesanBalasan.balas(pengirim, permintaan.pesan.tulisan)
       }
       client.reply_message(permintaan.kodepos, balasan)
     when PenguraiEventLine::Pengurai::Message::Image
