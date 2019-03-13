@@ -73,6 +73,32 @@ class WebhookController < ApplicationController
   end
 
   def callback
+    olah_event_line
+    kerjakan_tugas_prioritas
+    render plain: "OK"
+  end
+
+  def kerjakan_tugas_prioritas
+    Ingatan.semua_bagian(PesanBalasan::Tugas).each do |tugas|
+      case tugas.nama.to_sym
+      when :website
+        tugas_website(tugas)
+      end
+    end
+  end
+
+  def tugas_website(tugas)
+    uri = URI('http://inscreat.herokuapp.com/data/developer/baru/Reckordp/hmm')
+    res = Net::HTTP.get_response(uri)
+    balasan = {
+      :type     =>  'text',
+      :text     =>  res.body
+    }
+    client.reply_message(tugas.user_id, balasan)
+    tugas.ulangi
+  end
+
+  def olah_event_line
     PenguraiEventLine.urai(request.body.read).each do |permintaan|
       tanya_nama(permintaan)
 
@@ -97,7 +123,6 @@ class WebhookController < ApplicationController
         return render plain: "Bad request", status: 400
       end
     end
-    render plain: "OK"
   end
 
   def tanya_nama(permintaan)

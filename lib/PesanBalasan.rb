@@ -25,6 +25,7 @@ module PesanBalasan
       Ingatan.buat_rancangan(Grup, bentuk_grup)
 
       bentuk_tugas = Ingatan::BentukPartikelRancangan.new
+      bentuk_dialog.tambah_jenis(:user_id, :string)
       bentuk_tugas.tambah_jenis(:tugas, :string)
       Ingatan.buat_rancangan(Tugas, bentuk_tugas)
     end
@@ -65,7 +66,7 @@ module PesanBalasan
     def perintah(pengirim, pesan)
       case pesan
       when /TK\: DT/, /[Uu]pda?te?/, /[Pp]e?ba?ru?i?/, /[Bb]e?ri?ta?/, /[Ww]e?bsi?t?e?/
-        tambah_tugas(:website)
+        tambah_tugas(pengirim.nomorinduk, :website)
         "Aku tanya dulu..."
       when /(.+) jawaba?n?nya (.+)/
         tambah_enviroment(pengirim, $1, $2)
@@ -77,11 +78,14 @@ module PesanBalasan
     end
 
     def sapaan(pengirim, pesan)
+      nama = pengirim.rincian.nama[0, 4]
       case pesan
       when /[Hh]alo ?(\w*)/
-        format("%s %s", "Hai", (nama?($1) ? pengirim.rincian.nama : ""))
+        format("%s %s", "Hai", (nama?($1) ? nama : ""))
       when /[Hh]ai ?(\w*)/
-        format("%s %s", "Halo", (nama?($1) ? pengirim.rincian.nama : ""))
+        format("%s %s", "Halo", (nama?($1) ? nama : ""))
+      when nama?(pesan)
+        nama
       end
     end
 
@@ -112,8 +116,9 @@ module PesanBalasan
       return false
     end
 
-    def tambah_tugas(nama_tugas)
+    def tambah_tugas(user_id, nama_tugas)
       selesai = ambil_bagian_kosong(Tugas) { |bagian| bagian.tugas.empty? }
+      selesai.user_id = user_id
       selesai.tugas = nama_tugas.to_s
       selesai.ubah_data
       return true
@@ -124,7 +129,9 @@ module PesanBalasan
       gumpalan_jawab.gsub!(/\//) { "," }
       gumpalan_jawab.gsub!(/\, /) { "," }
 
-      bag = ambil_bagian_kosong(Dialog) { |bagian| bagian.user_id.empty? }
+      bag = ambil_bagian_kosong(Dialog) do |bagian|
+        bagian.user_id.empty? || bagian.pertanyaan == tanya
+      end
       bag.user_id = pengirim.nomorinduk
       bag.pertanyaan = tanya
       bag.jawaban = gumpalan_jawab
