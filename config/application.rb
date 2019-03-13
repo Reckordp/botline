@@ -1,7 +1,9 @@
 require_relative 'boot'
 
 require 'rails/all'
+require_relative "../lib/Ingatan"
 require_relative "../lib/PesanBalasan"
+require_relative "../lib/PenguraiEventLine"
 require "line/bot"
 
 # Require the gems listed in Gemfile, including any gems

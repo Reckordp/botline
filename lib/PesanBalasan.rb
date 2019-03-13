@@ -1,6 +1,6 @@
 module PesanBalasan
   class << self
-    DAFTAR_BALASAN = {
+    DAFTAR_BALASAN_UMUM = {
       :halo             =>      ["Iya?", "Apa?", "Hai"],
       :nanya            =>      ["Punya", "Ada", "Iya"],
       :nama             =>      ["nama saya Zakira", "Zakira", "Panggil aja Zakira"],
@@ -9,46 +9,139 @@ module PesanBalasan
       :ok               =>      "OK"
     }
 
-    def buat_balasan(pesan)
-      case pesan.message['text']
-      when /^[Hh]{1,1}[Aa]?[Ll]{1,1}[Oo]+[\?]?$/
-        ambil_balasan(:halo)
-      when /^[Pp]*[u]?ny[a]?/
-        kepunyaan(pesan)
-      when /^[Nn][a]?mamu\?$/
-        ambil_balasan(:nama)
-      when /^[Uu]m[u]?rmu\?$/
-        ambil_balasan(:umur)
-      when /^[Kk][a]?p[a]?n l[a]?hir\?$/
-        ambil_balasan(:umur)
-      when /^([\w\s]+) j[a]?w[a]?bny[a]? ([\w\,\s]+)$/
-        DAFTAR_BALASAN[$1] = $2.split(',')
-        balasan(:ok)
-      else
-        if DAFTAR_BALASAN.key?(pesan.message['text'])
-          ambil_balasan(pesan.message['text'])
-        else
-          ambil_balasan(:bingung)
-        end
+    Dialog = "Dialog"
+    Grup = "Grup"
+    Tugas = "Daftar Tugas"
+
+    def persiapan
+      bentuk_dialog = Ingatan::BentukPartikelRancangan.new
+      bentuk_dialog.tambah_jenis(:user_id, :string)
+      bentuk_dialog.tambah_jenis(:pertanyaan, :string)
+      bentuk_dialog.tambah_jenis(:jawaban, :text)
+      Ingatan.buat_rancangan(Dialog, bentuk_dialog)
+
+      bentuk_grup = Ingatan::BentukPartikelRancangan.new
+      bentuk_grup.tambah_jenis(:grup_id, :string)
+      Ingatan.buat_rancangan(Grup, bentuk_grup)
+
+      bentuk_tugas = Ingatan::BentukPartikelRancangan.new
+      bentuk_tugas.tambah_jenis(:tugas, :string)
+      Ingatan.buat_rancangan(Tugas, bentuk_tugas)
+    end
+
+    def balas(pengirim, gumpalan_pesan)
+      pesan = urai_pesan(gumpalan_pesan)
+      pesan.map! { |pesan| pencarian_balasan(pengirim, pesan) }
+      return bentuk_balasan(pesan)
+    end
+
+    def urai_pesan(gumpalan_pesan)
+      return gumpalan_pesan.split(/\./)
+    end
+
+    def bentuk_balasan(balasan)
+      return balasan.join("\n")
+    end
+
+    def pencarian_balasan(pengirim, pesan)
+      khusus = balasan_khusus(pengirim, pesan)
+      return khusus if khusus
+      umum = balasan_umum(pengirim, pesan)
+      return umum if umum
+      return "Gak ada enviromentnya..."
+    end
+
+    def balasan_umum(pengirim, pesan)
+      balas = []
+      balas << perintah(pengirim, pesan)
+      balas << sapaan(pengirim, pesan)
+      balas << kepunyaan(pesan)
+      balas << pujian(pesan)
+      balas << curhat(pesan)
+      balas.compact!
+      return balas.empty? ? nil : balas.first
+    end
+
+    def perintah(pengirim, pesan)
+      case pesan
+      when /TK\: DT/, /[Uu]pda?te?/, /[Pp]e?ba?ru?i?/, /[Bb]e?ri?ta?/, /[Ww]e?bsi?t?e?/
+        tambah_tugas(:website)
+        "Aku tanya dulu..."
+      when /(.+) jawaba?n?nya (.+)/
+        tambah_enviroment(pengirim, $1, $2)
+        "Enviroment ditambahkan"
+      when /TK\: RM/, /[Rr]incian emot/, /[Ss]elidiki emot/, /[Nn]omor emot/
+        tambah_tugas(:emot)
+        "Merekam..."
+      end
+    end
+
+    def sapaan(pengirim, pesan)
+      case pesan
+      when /[Hh]alo ?(\w*)/
+        "Hai" + (nama?($1) ? pengirim.rincian.nama : "")
+      when /[Hh]ai ?(\w*)/
+        "Halo" + (nama?($1) ? pengirim.rincian.nama : "")
       end
     end
 
     def kepunyaan(pesan)
-      case pesan.message['text']
-      when /n[a]?ma[\?]?$/
-        sprintf("%s, %s", ambil_balasan(:nanya), ambil_balasan(:nama))
-      when /um[u]?r\?$/
-        sprintf("%s, %s", ambil_balasan(:nanya), ambil_balasan(:umur))
+    end
+
+    def pujian(pesan)
+    end
+
+    def curhat(pesan)
+    end
+
+    def balasan_khusus(pengirim, pesan)
+      jawaban = []
+      Ingatan.semua_bagian(Dialog).each do |bagian|
+        next unless bagian.user_id == pengirim.nomorinduk
+        next unless bagian.pertanyaan == pesan
+        jawaban = bagian.jawaban.split(",")
       end
+      return nil if jawaban.empty?
+      return jawaban[rand(jawaban.size)]
     end
 
-    def ambil_balasan(jenis)
-      jawaban = balasan(jenis)
-      return jawaban[rand jawaban.size]
+    def nama?(tulisan)
+      return true if tulisan.match(/[Zz]akira/)
+      return true if tulisan.match(/[Kk]ira/)
+      return true if tulisan.match(/[Zz]aki/)
+      return false
     end
 
-    def balasan(jenis)
-      DAFTAR_BALASAN[jenis]
+    def tambah_tugas(nama_tugas)
+      selesai = ambil_bagian_kosong(Tugas) { |bagian| bagian.tugas.empty? }
+      selesai.tugas = nama_tugas.to_s
+      selesai.ubah_data
+      return true
+    end
+
+    def tambah_enviroment(pengirim, tanya, gumpalan_jawab)
+      gumpalan_jawab.gsub!(/at[wau]{1,2}/) { "," }
+      gumpalan_jawab.gsub!(/\//) { "," }
+      gumpalan_jawab.gsub!(/\, /) { "," }
+
+      bag = ambil_bagian_kosong(Dialog) { |bagian| bagian.user_id.empty? }
+      bag.user_id = pengirim.nomorinduk
+      bag.tanya = tanya
+      bag.jawab = gumpalan_jawab
+      bag.ubah_data
+      return true
+    end
+
+    def ambil_bagian_kosong(nama_rancangan)
+      selesai = false
+      Ingatan.semua_bagian(nama_rancangan).each do |bagian|
+        next unless yield(bagian)
+        selesai = bagian
+        break
+      end
+      selesai = Ingatan.baru(nama_rancangan) unless selesai
+      return selesai
     end
   end
+  persiapan
 end
