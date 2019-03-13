@@ -1,17 +1,18 @@
 module PesanBalasan
-  class << self
-    DAFTAR_BALASAN_UMUM = {
-      :halo             =>      ["Iya?", "Apa?", "Hai"],
-      :nanya            =>      ["Punya", "Ada", "Iya"],
-      :nama             =>      ["nama saya Zakira", "Zakira", "Panggil aja Zakira"],
-      :bingung          =>      ["Gak ada enviromentnya..."],
-      :umur             =>      ["Lahirku 10 Maret 2019"],
-      :ok               =>      "OK"
-    }
+  DAFTAR_BALASAN_UMUM = {
+    :halo             =>      ["Iya?", "Apa?", "Hai"],
+    :nanya            =>      ["Punya", "Ada", "Iya"],
+    :nama             =>      ["nama saya Zakira", "Zakira", "Panggil aja Zakira"],
+    :bingung          =>      ["Gak ada enviromentnya..."],
+    :umur             =>      ["Lahirku 10 Maret 2019"],
+    :ok               =>      "OK"
+  }
 
-    Dialog = "Dialog"
-    Grup = "Grup"
-    Tugas = "Daftar Tugas"
+  Dialog = "Dialog"
+  Grup = "Grup"
+  Tugas = "Daftar Tugas"
+  
+  class << self
 
     def persiapan
       bentuk_dialog = Ingatan::BentukPartikelRancangan.new
