@@ -79,9 +79,9 @@ module PesanBalasan
     def sapaan(pengirim, pesan)
       case pesan
       when /[Hh]alo ?(\w*)/
-        "Hai" + (nama?($1) ? pengirim.rincian.nama : "")
+        format("%s %s", "Hai", (nama?($1) ? pengirim.rincian.nama : ""))
       when /[Hh]ai ?(\w*)/
-        "Halo" + (nama?($1) ? pengirim.rincian.nama : "")
+        format("%s %s", "Halo", (nama?($1) ? pengirim.rincian.nama : ""))
       end
     end
 
@@ -126,8 +126,8 @@ module PesanBalasan
 
       bag = ambil_bagian_kosong(Dialog) { |bagian| bagian.user_id.empty? }
       bag.user_id = pengirim.nomorinduk
-      bag.tanya = tanya
-      bag.jawab = gumpalan_jawab
+      bag.pertanyaan = tanya
+      bag.jawaban = gumpalan_jawab
       bag.ubah_data
       return true
     end
