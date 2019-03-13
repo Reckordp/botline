@@ -33,28 +33,77 @@ class WebhookController < ApplicationController
     client.reply_message(pesan['replyToken'], konten)
   end
 
-  def callback
-    body = request.body.read
-    events = client.parse_events_from(body)
+  def pengelola_pesan(permintaan)
+    pengirim = permintaan.pengirim
+    case permintaan.pesan
+    when PenguraiEventLine::Pengurai::Message::Text
+      balasan = {
+        type:     =>  'text',
+        text:     =>  PesanBalasan.balas(pengirim, permintaan.pesan.tulisan)
+      }
+      client.reply_message(permintaan.kodepos, balasan)
+    when PenguraiEventLine::Pengurai::Message::Image
+    when PenguraiEventLine::Pengurai::Message::Video
+    when PenguraiEventLine::Pengurai::Message::Audio
+    when PenguraiEventLine::Pengurai::Message::Fileu
+    when PenguraiEventLine::Pengurai::Message::Location
+    when PenguraiEventLine::Pengurai::Message::Sticker
+    end
+  end
 
-    events.each do |event|
-      case event
-      when Line::Bot::Event::Message
-        menerima_pesan(event)
-      when Line::Bot::Event::MessageType::Text
-        message = {
-          type: 'text',
-          text: event.message['text']
-        }
-        client.reply_message(event['replyToken'], message)
-      when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
-        reponse = client.get_message_content(event.message['id'])
-        tf = Tempfile.open('content')
-        tf.write(reponse.body)
+  def pengelola_pengikut(permintaan)
+  end
+
+  def pengelola_sapaan(permintaan)
+  end
+
+  def pengelola_sambutan(permintaan)
+  end
+
+  def pengelola_postback(permintaan)
+  end
+
+  def pengelola_beacon(permintaan)
+  end
+
+  def pengelola_akun_link(permintaan)
+  end
+
+  def pengelola_perangkat(permintaan)
+  end
+
+  def callback
+    PenguraiEventLine.urai(request.body.read).each do |permintaan|
+      tanya_nama(permintaan)
+
+      case permintaan
+      when PenguraiEventLine::Pengurai::Message
+        pengelola_pesan(permintaan)
+      when PenguraiEventLine::Pengurai::Follow, PenguraiEventLine::Pengurai::Unfollow
+        pengelola_pengikut(permintaan)
+      when PenguraiEventLine::Pengurai::Join, PenguraiEventLine::Pengurai::Leave
+        pengelola_sapaan(permintaan)
+      when PenguraiEventLine::Pengurai::MemberJoined, PenguraiEventLine::Pengurai::MemberLeft
+        pengelola_sambutan(permintaan)
+      when PenguraiEventLine::Pengurai::Postback
+        pengelola_postback(permintaan)
+      when PenguraiEventLine::Pengurai::Beacon
+        pengelola_beacon(permintaan)
+      when PenguraiEventLine::Pengurai::AccountLink
+        pengelola_akun_link(permintaan)
+      when PenguraiEventLine::Pengurai::Thing
+        pengelola_perangkat(permintaan)
+      else
+        return render plain: "Bad request", status: 400
       end
     end
-
     render plain: "OK"
+  end
+
+  def tanya_nama(permintaan)
+    id = permintaan.pengirim.nomorinduk
+    gumpalan = JSON.parse(client.get_profile(id).body)
+    permintaan.pengirim.rincian = PenguraiEventLine::Pengurai::Pengirim::Rincian.urai(gumpalan)
   end
 
   def callback_text
