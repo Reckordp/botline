@@ -127,7 +127,9 @@ module PesanBalasan
       gumpalan_jawab.gsub!(/\//) { "," }
       gumpalan_jawab.gsub!(/\, /) { "," }
 
-      bag = ambil_bagian_kosong(Dialog) { |bagian| bagian.user_id.empty? }
+      bag = ambil_bagian_kosong(Dialog) do |bagian|
+        bagian.user_id.empty? || bagian.pertanyaan == tanya
+      end
       bag.user_id = pengirim.nomorinduk
       bag.pertanyaan = tanya
       bag.jawaban = gumpalan_jawab
