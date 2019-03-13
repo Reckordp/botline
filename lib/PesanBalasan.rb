@@ -77,11 +77,14 @@ module PesanBalasan
     end
 
     def sapaan(pengirim, pesan)
+      nama = pengirim.rincian.nama[0, 4]
       case pesan
       when /[Hh]alo ?(\w*)/
-        format("%s %s", "Hai", (nama?($1) ? pengirim.rincian.nama : ""))
+        format("%s %s", "Hai", (nama?($1) ? nama : ""))
       when /[Hh]ai ?(\w*)/
-        format("%s %s", "Halo", (nama?($1) ? pengirim.rincian.nama : ""))
+        format("%s %s", "Halo", (nama?($1) ? nama : ""))
+      when nama?(pesan)
+        nama
       end
     end
 
