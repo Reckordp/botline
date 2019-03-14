@@ -33,15 +33,37 @@ class WebhookController < ApplicationController
     client.reply_message(pesan['replyToken'], konten)
   end
 
+  def kirim_pesan(kodepos, pesan)
+    client.reply_message(kodepos, pesan)
+  end
+
+  def dipanggil?(pesan)
+    panggilan = false
+    case pesan
+    when PenguraiEventLine::Pengurai::Message::Text
+      panggilan = true if pesan.tulisan =~ /\sBot\s/
+      panggilan = true if PesanBalasan.nama?(nama) || panggilan
+    end
+    return panggilan
+  end
+
+  def buat_pesan_terstruktur(jenis, isi)
+    struktur = nil
+    case jenis
+    when :text
+      struktur = {
+        :type     =>  'text',
+        :text     =>  isi,
+      }
+    end
+    return struktur
+  end
+
   def pengelola_pesan(permintaan)
-    pengirim = permintaan.pengirim
+    return if !permintaan.pengirim.sendiri? && !dipanggil?(permintaan.pesan)
     case permintaan.pesan
     when PenguraiEventLine::Pengurai::Message::Text
-      balasan = {
-        :type     =>  'text',
-        :text     =>  PesanBalasan.balas(pengirim, permintaan.pesan.tulisan)
-      }
-      client.reply_message(permintaan.kodepos, balasan)
+      kirim_pesan(permintaan.kodepos, buat_pesan_terstruktur(:text, PesanBalasan.balas(permintaan)))
     when PenguraiEventLine::Pengurai::Message::Image
     when PenguraiEventLine::Pengurai::Message::Video
     when PenguraiEventLine::Pengurai::Message::Audio
@@ -51,13 +73,16 @@ class WebhookController < ApplicationController
     end
   end
 
-  def pengelola_pengikut(permintaan)
+  def pengelola_ditambahkan(permintaan)
+    kirim_pesan(permintaan.kodepos, buat_pesan_terstruktur(:text, PesanBalasan.pesan_pembuka))
   end
 
-  def pengelola_sapaan(permintaan)
+  def pengelola_diundang_grup(permintaan)
+    kirim_pesan(permintaan.kodepos, buat_pesan_terstruktur(:text, PesanBalasan.undangan_grup))
   end
 
   def pengelola_sambutan(permintaan)
+    kirim_pesan(permintaan.kodepos, buat_pesan_terstruktur(:text, PesanBalasan.sambut))
   end
 
   def pengelola_postback(permintaan)
@@ -79,7 +104,6 @@ class WebhookController < ApplicationController
   end
 
   def kerjakan_tugas_prioritas
-    p Ingatan.semua_bagian(PesanBalasan::Tugas)
     Ingatan.semua_bagian(PesanBalasan::Tugas).each do |tugas|
       case tugas.tugas.to_sym
       when :website
@@ -102,7 +126,7 @@ class WebhookController < ApplicationController
       :type     =>  'text',
       :text     =>  res.body
     }
-    client.push_message(tugas.user_id, balasan)
+    kirim_pesan(tugas.kodepos, balasan)
     tugas.ulangi
     tugas.ubah_data
   end
@@ -114,11 +138,11 @@ class WebhookController < ApplicationController
       case permintaan
       when PenguraiEventLine::Pengurai::Message
         pengelola_pesan(permintaan)
-      when PenguraiEventLine::Pengurai::Follow, PenguraiEventLine::Pengurai::Unfollow
-        pengelola_pengikut(permintaan)
+      when PenguraiEventLine::Pengurai::Follow
+        pengelola_ditambahkan(permintaan)
       when PenguraiEventLine::Pengurai::Join, PenguraiEventLine::Pengurai::Leave
-        pengelola_sapaan(permintaan)
-      when PenguraiEventLine::Pengurai::MemberJoined, PenguraiEventLine::Pengurai::MemberLeft
+        pengelola_diundang_grup(permintaan)
+      when PenguraiEventLine::Pengurai::MemberJoined#, PenguraiEventLine::Pengurai::MemberLeft
         pengelola_sambutan(permintaan)
       when PenguraiEventLine::Pengurai::Postback
         pengelola_postback(permintaan)

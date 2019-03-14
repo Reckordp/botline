@@ -40,6 +40,10 @@ module PenguraiEventLine
         saya.rincian = nil
         return saya
       end
+
+      def sendiri?
+        @jenis == 'user'
+      end
     end
     class Dasar < ::PenguraiEventLine::DasarEvent
       data :jenis

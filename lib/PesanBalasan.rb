@@ -1,4 +1,6 @@
 module PesanBalasan
+  Pemilik = 'Uabc3a27c357d0ab0484c8c171ff0062f'
+
   DAFTAR_BALASAN_UMUM = {
     :halo             =>      ["Iya?", "Apa?", "Hai"],
     :nanya            =>      ["Punya", "Ada", "Iya"],
@@ -25,14 +27,14 @@ module PesanBalasan
       Ingatan.buat_rancangan(Grup, bentuk_grup)
 
       bentuk_tugas = Ingatan::BentukPartikelRancangan.new
-      bentuk_tugas.tambah_jenis(:user_id, :string)
+      bentuk_tugas.tambah_jenis(:kodepos, :string)
       bentuk_tugas.tambah_jenis(:tugas, :string)
       Ingatan.buat_rancangan(Tugas, bentuk_tugas)
     end
 
-    def balas(pengirim, gumpalan_pesan)
-      pesan = urai_pesan(gumpalan_pesan)
-      pesan.map! { |pesan| pencarian_balasan(pengirim, pesan) }
+    def balas(event_pesan)
+      pesan = urai_pesan(event_pesan.pesan.tulisan)
+      pesan.map! { |pesan| pencarian_balasan(event_pesan, pesan) }
       return bentuk_balasan(pesan)
     end
 
@@ -44,18 +46,18 @@ module PesanBalasan
       return balasan.join("\n")
     end
 
-    def pencarian_balasan(pengirim, pesan)
-      khusus = balasan_khusus(pengirim, pesan)
+    def pencarian_balasan(event_pesan, pesan)
+      khusus = balasan_khusus(event_pesan, pesan)
       return khusus if khusus
-      umum = balasan_umum(pengirim, pesan)
+      umum = balasan_umum(event_pesan, pesan)
       return umum if umum
       return "Gak ada enviromentnya..."
     end
 
-    def balasan_umum(pengirim, pesan)
+    def balasan_umum(event_pesan, pesan)
       balas = []
-      balas << perintah(pengirim, pesan)
-      balas << sapaan(pengirim, pesan)
+      balas << perintah(event_pesan.kodepos, pesan)
+      balas << sapaan(event_pesan.pengirim, pesan)
       balas << kepunyaan(pesan)
       balas << pujian(pesan)
       balas << curhat(pesan)
@@ -63,16 +65,16 @@ module PesanBalasan
       return balas.empty? ? nil : balas.first
     end
 
-    def perintah(pengirim, pesan)
+    def perintah(kodepos, pesan)
       case pesan
-      when /TK\: DT/, /[Uu]pda?te?/, /[Pp]e?ba?ru?i?/, /[Bb]e?ri?ta?/, /[Ww]e?bsi?t?e?/
-        tambah_tugas(pengirim.nomorinduk, :website)
+      when /TK\: DT/, /[Uu]pda?te?/, /[Pp]e?rba?ru?i?/, /[Bb]e?ri?ta?/, /[Ww]e?bsi?t?e?/, /[Ww]eb/
+        tambah_tugas(kodepos, :website)
         "Aku tanya dulu..."
-      when /(.+) jawaba?n?nya (.+)/
+      when /TE\: ED/, /(.+) jawaba?n?nya (.+)/
         tambah_enviroment(pengirim, $1, $2)
         "Enviroment ditambahkan"
       when /TK\: RM/, /[Rr]incian emot/, /[Ss]elidiki emot/, /[Nn]omor emot/
-        tambah_tugas(:emot)
+        tambah_tugas(kodepos, :emot)
         "Merekam..."
       end
     end
@@ -116,9 +118,9 @@ module PesanBalasan
       return false
     end
 
-    def tambah_tugas(user_id, nama_tugas)
+    def tambah_tugas(kodepos, nama_tugas)
       selesai = ambil_bagian_kosong(Tugas) { |bagian| bagian.tugas.empty? }
-      selesai.user_id = user_id
+      selesai.kodepos = kodepos
       selesai.tugas = nama_tugas.to_s
       selesai.ubah_data
       return true
@@ -137,6 +139,16 @@ module PesanBalasan
       bag.jawaban = gumpalan_jawab
       bag.ubah_data
       return true
+    end
+
+    def pesan_pembuka
+      return "Salam Kenal"
+    end
+
+    def undangan_grup
+    end
+
+    def sambut
     end
 
     def ambil_bagian_kosong(nama_rancangan)
