@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :null_session
-  before_action :validate_signature
+  # before_action :validate_signature
 
   def validate_signature
     body = request.body.read
