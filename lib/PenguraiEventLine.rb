@@ -15,6 +15,7 @@ module PenguraiEventLine
         data :status
 
         def self.urai(gumpalan)
+          p gumpalan
           saya = super
           saya.nama = gumpalan['displayName']
           saya.alamatPP = gumpalan['pictureUrl']
