@@ -135,13 +135,9 @@ class WebhookController < ApplicationController
   end
 
   def tanya_nama(permintaan)
-    # id = permintaan.pengirim.nomorinduk
-    # gumpalan = JSON.parse(client.get_profile(id).body)
-    # permintaan.pengirim.rincian = PenguraiEventLine::Pengurai::Pengirim::Rincian.urai(gumpalan)
-    permintaan.pengirim.rincian = PenguraiEventLine::Pengurai::Pengirim::Rincian.new
-    permintaan.pengirim.rincian.nama = "Reckordp"
-    permintaan.pengirim.rincian.alamatPP = "http://tidakada.com/"
-    permintaan.pengirim.rincian.status = "Jomblo"
+    id = permintaan.pengirim.nomorinduk
+    gumpalan = JSON.parse(client.get_profile(id).body)
+    permintaan.pengirim.rincian = PenguraiEventLine::Pengurai::Pengirim::Rincian.urai(gumpalan)
   end
 
   def callback_text
