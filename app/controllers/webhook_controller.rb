@@ -1,14 +1,14 @@
 class WebhookController < ApplicationController
-  def menerima_pesan(pesan)
-    case pesan.type
-    when Line::Bot::Event::MessageType::Text
-      balas_pesan(pesan, PesanBalasan.buat_balasan(pesan))
-    when Line::Bot::Event::MessageType::Sticker
-      menerima_stiker(pesan)
-    end
-  end
+  # def menerima_pesan(pesan)
+  #   case pesan.type
+  #   when Line::Bot::Event::MessageType::Text
+  #     balas_pesan(pesan, PesanBalasan.buat_balasan(pesan))
+  #   when Line::Bot::Event::MessageType::Sticker
+  #     menerima_stiker(pesan)
+  #   end
+  # end
 
-  def menerima_stiker(pesan)
+  # def menerima_stiker(pesan)
   #   msgapi = pesan.message['packageId'].to_i <= 4
   #   messages = [{
   #     type: 'text',
