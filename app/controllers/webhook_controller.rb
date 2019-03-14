@@ -72,7 +72,7 @@ class WebhookController < ApplicationController
     return if !permintaan.pengirim.sendiri? && !dipanggil?(permintaan.pesan)
     case permintaan.pesan
     when PenguraiEventLine::Pengurai::Message::Text
-      kirim_pesan(permintaan.kodepos, buat_pesan_terstruktur(:text, PesanBalasan.balas(permintaan)))
+      kirim_pesan(permintaan.kodepos, :text, PesanBalasan.balas(permintaan))
     when PenguraiEventLine::Pengurai::Message::Image
     when PenguraiEventLine::Pengurai::Message::Video
     when PenguraiEventLine::Pengurai::Message::Audio
