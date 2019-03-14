@@ -133,6 +133,7 @@ class WebhookController < ApplicationController
 
   def olah_event_line
     PenguraiEventLine.urai(request.body.read).each do |permintaan|
+      p permintaan
       tanya_nama(permintaan)
 
       case permintaan
@@ -160,7 +161,9 @@ class WebhookController < ApplicationController
 
   def tanya_nama(permintaan)
     gumpalan = JSON.parse(client.get_profile(permintaan.pengirim.nomorinduk).body)
+    p gumpalan
     permintaan.pengirim.rincian = PenguraiEventLine::Pengurai::Pengirim::Rincian.urai(gumpalan)
+    p permintaan.pengirim.rincian
   end
 
   def callback_text
