@@ -105,6 +105,7 @@ class WebhookController < ApplicationController
 
   def kerjakan_tugas_prioritas
     Ingatan.semua_bagian(PesanBalasan::Tugas).each do |tugas|
+      p tugas
       case tugas.tugas.to_sym
       when :website
         tugas_website(tugas)
@@ -122,6 +123,7 @@ class WebhookController < ApplicationController
     uri = URI(format('%s//%s/%s/%s/%s', sistem, website, tempat, username, password))
     uri.port = port
     res = Net::HTTP.get_response(uri)
+    p res
     balasan = {
       :type     =>  'text',
       :text     =>  res.body
@@ -133,7 +135,6 @@ class WebhookController < ApplicationController
 
   def olah_event_line
     PenguraiEventLine.urai(request.body.read).each do |permintaan|
-      p permintaan
       tanya_nama(permintaan)
 
       case permintaan
@@ -161,9 +162,7 @@ class WebhookController < ApplicationController
 
   def tanya_nama(permintaan)
     gumpalan = JSON.parse(client.get_profile(permintaan.pengirim.nomorinduk).body)
-    p gumpalan
     permintaan.pengirim.rincian = PenguraiEventLine::Pengurai::Pengirim::Rincian.urai(gumpalan)
-    p permintaan.pengirim.rincian
   end
 
   def callback_text
