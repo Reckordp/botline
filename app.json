@@ -1,11 +1,20 @@
 {
-  "name": "botline",
-  "scripts": {},
+  "addons": [
+
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/ruby"
+    }
+  ],
   "env": {
     "LANG": {
       "required": true
     },
     "RACK_ENV": {
+      "required": true
+    },
+    "RAILS_ENV": {
       "required": true
     },
     "RAILS_LOG_TO_STDOUT": {
@@ -23,11 +32,8 @@
       "quantity": 1
     }
   },
-  "addons": [],
-  "buildpacks": [
-    {
-      "url": "heroku/ruby"
-    }
-  ],
-  "stack":"heroku-18"
+  "name": "botline",
+  "scripts": {
+  },
+  "stack": "heroku-18"
 }
