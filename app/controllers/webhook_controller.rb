@@ -79,6 +79,7 @@ class WebhookController < ApplicationController
   end
 
   def kerjakan_tugas_prioritas
+    p Ingatan.semua_bagian(PesanBalasan::Tugas)
     Ingatan.semua_bagian(PesanBalasan::Tugas).each do |tugas|
       case tugas.tugas.to_sym
       when :website
@@ -88,7 +89,14 @@ class WebhookController < ApplicationController
   end
 
   def tugas_website(tugas)
-    uri = URI('http://inscreat.herokuapp.com/data/developer/baru/Reckordp/hmm')
+    sistem = 'https:'
+    website = 'inscreat.herokuapp.com'
+    tempat = 'data/developer/baru'
+    username = 'Reckordp'
+    password = 'tidakada'
+    port = 443
+    uri = URI(format('%s//%s/%s/%s/%s', sistem, website, tempat, username, password))
+    uri.port = port
     res = Net::HTTP.get_response(uri)
     balasan = {
       :type     =>  'text',
@@ -96,6 +104,7 @@ class WebhookController < ApplicationController
     }
     client.push_message(tugas.user_id, balasan)
     tugas.ulangi
+    tugas.ubah_data
   end
 
   def olah_event_line

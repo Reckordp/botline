@@ -146,6 +146,7 @@ module PesanBalasan
         selesai = bagian
         break
       end
+      return selesai if selesai
       selesai = Ingatan.baru(nama_rancangan) unless selesai
       return selesai
     end
