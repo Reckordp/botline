@@ -86,6 +86,7 @@ GEM
     jbuilder (2.8.0)
       activesupport (>= 4.2.0)
       multi_json (>= 1.2)
+    line-bot-api (1.7.0)
     loofah (2.2.3)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -103,6 +104,7 @@ GEM
     nio4r (2.3.1)
     nokogiri (1.10.1-x86-mingw32)
       mini_portile2 (~> 2.4.0)
+    pg (1.1.4-x86-mingw32)
     public_suffix (3.0.3)
     puma (3.12.0)
     rack (2.0.6)
@@ -193,6 +195,8 @@ DEPENDENCIES
   coffee-rails (~> 4.2)
   duktape
   jbuilder (~> 2.5)
+  line-bot-api
+  pg
   puma (~> 3.11)
   rails (~> 5.2.2)
   sass-rails (~> 5.0)
