@@ -16,9 +16,15 @@ module PenguraiEventLine
 
         def self.urai(gumpalan)
           saya = super
-          saya.nama = gumpalan['displayName']
-          saya.alamatPP = gumpalan['pictureUrl']
-          saya.status = gumpalan['statusMessage']
+          if gumpalan['message'] == 'Not found'
+            saya.nama = "Tanpa Nama"
+            saya.alamatPP = ""
+            saya.status = "HILANG!!!"
+          else
+            saya.nama = gumpalan['displayName']
+            saya.alamatPP = gumpalan['pictureUrl']
+            saya.status = gumpalan['statusMessage']
+          end
           return saya
         end
       end
@@ -39,6 +45,10 @@ module PenguraiEventLine
         saya.nomorinduk = gumpalan['userId']
         saya.rincian = nil
         return saya
+      end
+
+      def sendiri?
+        @jenis == 'user'
       end
     end
     class Dasar < ::PenguraiEventLine::DasarEvent
