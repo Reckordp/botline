@@ -15,8 +15,8 @@ module PenguraiEventLine
         data :status
 
         def self.urai(gumpalan)
-          saya.nama = "Tanpa Nama" if gumpalan['message'] == 'Not found'
           saya = super
+          return saya.nama = "Tanpa Nama" if gumpalan['message'] == 'Not found'
           saya.nama = gumpalan['displayName']
           saya.alamatPP = gumpalan['pictureUrl']
           saya.status = gumpalan['statusMessage']
