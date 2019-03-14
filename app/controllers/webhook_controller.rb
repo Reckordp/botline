@@ -160,6 +160,7 @@ class WebhookController < ApplicationController
 
   def tanya_nama(permintaan)
     gumpalan = JSON.parse(client.get_profile(permintaan.pengirim.nomorinduk).body)
+    puts gumpalan
     permintaan.pengirim.rincian = PenguraiEventLine::Pengurai::Pengirim::Rincian.urai(gumpalan)
   end
 
