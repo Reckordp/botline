@@ -16,10 +16,15 @@ module PenguraiEventLine
 
         def self.urai(gumpalan)
           saya = super
-          return saya.nama = "Tanpa Nama" if gumpalan['message'] == 'Not found'
-          saya.nama = gumpalan['displayName']
-          saya.alamatPP = gumpalan['pictureUrl']
-          saya.status = gumpalan['statusMessage']
+          if gumpalan['message'] == 'Not found'
+            saya.nama = "Tanpa Nama"
+            saya.alamatPP = ""
+            saya.status = "HILANG!!!"
+          else
+            saya.nama = gumpalan['displayName']
+            saya.alamatPP = gumpalan['pictureUrl']
+            saya.status = gumpalan['statusMessage']
+          end
           return saya
         end
       end
