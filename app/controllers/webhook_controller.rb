@@ -9,32 +9,41 @@ class WebhookController < ApplicationController
   end
 
   def menerima_stiker(pesan)
-    msgapi = pesan.message['packageId'].to_i <= 4
-    messages = [{
-      type: 'text',
-      text: "[STICKER]\npackageId: #{pesan.message['packageId']}\nstickerId: #{pesan.message['stickerId']}"
-      }]
+  #   msgapi = pesan.message['packageId'].to_i <= 4
+  #   messages = [{
+  #     type: 'text',
+  #     text: "[STICKER]\npackageId: #{pesan.message['packageId']}\nstickerId: #{pesan.message['stickerId']}"
+  #     }]
+  #
+  #   if msgapi
+  #     messages.push(
+  #       type: 'sticker',
+  #       packageId: pesan.message['packageId'],
+  #       stickerId: pesan.message['stickerId']
+  #     )
+  #   end
+  #   balas_konten(pesan, messages)
+  # end
+  #
+  # def balas_pesan(pesan, tulisan)
+  #   client.reply_message(pesan['replyToken'], { type: 'text', text: tulisan })
+  # end
+  #
+  # def balas_konten(pesan, konten)
+  #   client.push_message(pesan['replyToken'], konten)
+  # end
 
-    if msgapi
-      messages.push(
-        type: 'sticker',
-        packageId: pesan.message['packageId'],
-        stickerId: pesan.message['stickerId']
-      )
-    end
-    balas_konten(pesan, messages)
+  def siapkan_alat_balas
+    @penampungan = []
   end
 
-  def balas_pesan(pesan, tulisan)
-    client.reply_message(pesan['replyToken'], { type: 'text', text: tulisan })
+  def kirim_pesan(kodepos, jenis, isi)
+    @penampungan[0] = kodepos
+    @penampungan.push(buat_pesan_terstruktur(jenis, isi))
   end
 
-  def balas_konten(pesan, konten)
-    client.push_message(pesan['replyToken'], konten)
-  end
-
-  def kirim_pesan(kodepos, pesan)
-    client.reply_message(kodepos, pesan)
+  def kirim_balasan
+    @client.reply_message(@penampungan.shift, @penampungan)
   end
 
   def dipanggil?(pesan)
@@ -74,15 +83,15 @@ class WebhookController < ApplicationController
   end
 
   def pengelola_ditambahkan(permintaan)
-    kirim_pesan(permintaan.kodepos, buat_pesan_terstruktur(:text, PesanBalasan.pesan_pembuka))
+    kirim_pesan(permintaan.kodepos, kirim_pesan(:text, PesanBalasan.pesan_pembuka))
   end
 
   def pengelola_diundang_grup(permintaan)
-    kirim_pesan(permintaan.kodepos, buat_pesan_terstruktur(:text, PesanBalasan.undangan_grup))
+    kirim_pesan(permintaan.kodepos, kirim_pesan(:text, PesanBalasan.undangan_grup))
   end
 
   def pengelola_sambutan(permintaan)
-    kirim_pesan(permintaan.kodepos, buat_pesan_terstruktur(:text, PesanBalasan.sambut))
+    kirim_pesan(permintaan.kodepos, kirim_pesan(:text, PesanBalasan.sambut))
   end
 
   def pengelola_postback(permintaan)
@@ -98,14 +107,15 @@ class WebhookController < ApplicationController
   end
 
   def callback
+    siapkan_alat_balas
     olah_event_line
     kerjakan_tugas_prioritas
+    kirim_balasan
     render plain: "OK"
   end
 
   def kerjakan_tugas_prioritas
     Ingatan.semua_bagian(PesanBalasan::Tugas).each do |tugas|
-      p tugas
       case tugas.tugas.to_sym
       when :website
         tugas_website(tugas)
@@ -122,13 +132,7 @@ class WebhookController < ApplicationController
     port = 443
     uri = URI(format('%s//%s/%s/%s/%s', sistem, website, tempat, username, password))
     uri.port = port
-    res = Net::HTTP.get_response(uri)
-    p res
-    balasan = {
-      :type     =>  'text',
-      :text     =>  res.body
-    }
-    kirim_pesan(tugas.kodepos, balasan)
+    kirim_pesan(tugas.kodepos, :text, Net::HTTP.get_response(uri).body)
     tugas.ulangi
     tugas.ubah_data
   end
