@@ -33,7 +33,7 @@ module PesanBalasan
 
     def balas(tulisan, pengirim)
       pesan = urai_pesan(tulisan)
-      pesan.map! { |psn| pencarian_balasan(psn, pengirim) }
+      pesan.map! { |psn| *pencarian_balasan(psn, pengirim) }
       return bentuk_balasan(pesan)
     end
 
