@@ -168,17 +168,17 @@ module PesanBalasan
       selesai = Ingatan.baru(nama_rancangan) unless selesai
       return selesai
     end
-  end
 
-  def buat_format_jenis(jenis, isi)
-    hsl = []
-    case jenis
-    when :tulisan
-      hsl << format("[%s %s]", "TULISAN", isi)
-    when :emot
-      hsl << format("[%s %d %d]", "EMOT", isi[:paket], isi[:nomor])
+    def buat_format_jenis(jenis, isi)
+      hsl = []
+      case jenis
+      when :tulisan
+        hsl << format("[%s %s]", "TULISAN", isi)
+      when :emot
+        hsl << format("[%s %d %d]", "EMOT", isi[:paket], isi[:nomor])
+      end
+      return hsl
     end
-    return hsl
   end
 
   persiapan
