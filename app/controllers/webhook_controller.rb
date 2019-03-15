@@ -162,7 +162,7 @@ class WebhookController < ApplicationController
     when :emot
       a = @daftar_evtline.select { |i| i.is_a?(PenguraiEventLine::Pengurai::Message) } .map(&:pesan)
       a = a.find { |i| i.is_a?(PenguraiEventLine::Pengurai::Message::Sticker) }
-      return kirim_pesan(kodepos, :text, "Gak jadi merekam") if a.empty?
+      return kirim_pesan(kodepos, :text, "Gak jadi merekam") if a
       @diam = true
       tugas_rekam_emot(kodepos, a)
     end
