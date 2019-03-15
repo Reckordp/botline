@@ -47,7 +47,7 @@ class WebhookController < ApplicationController
   end
 
   def kirim_balasan
-    @penampungan.each { |kode, isi| @client&&.reply_message(kode, isi) }
+    @penampungan.each { |kode, isi| @client&.reply_message(kode, isi) }
   end
 
   def kirim_pesan_dari_gumpalan(kodepos, daftar_gumpalan)
