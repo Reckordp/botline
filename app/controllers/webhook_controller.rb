@@ -43,7 +43,7 @@ class WebhookController < ApplicationController
 
   def kirim_pesan(kodepos, isi_terformat)
     @penampungan[kodepos] ||= []
-    @penampungan[kodepos].push(*isi_terformat)
+    @penampungan[kodepos].push(isi_terformat)
   end
 
   def kirim_balasan
@@ -67,7 +67,7 @@ class WebhookController < ApplicationController
       hasil << buat_pesan_terstruktur(:emot, gumpalan.split(/ /).map(&:to_i))
     end
 
-    kirim_pesan(kodepos, hasil)
+    hasil.each { |h| kirim_pesan(kodepos, h) }
   end
 
   def dipanggil?(pesan)
@@ -162,7 +162,7 @@ class WebhookController < ApplicationController
     when :emot
       a = @daftar_evtline.select { |i| i.is_a?(PenguraiEventLine::Pengurai::Message) } .map(&:pesan)
       a = a.find { |i| i.is_a?(PenguraiEventLine::Pengurai::Message::Sticker) }
-      return kirim_pesan(kodepos, :text, "Gak jadi merekam") if a
+      return kirim_pesan(kodepos, buat_pesan_terstruktur(:text, "Gak jadi merekam")) unless a
       @diam = true
       tugas_rekam_emot(kodepos, a)
     end
