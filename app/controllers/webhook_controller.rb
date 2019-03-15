@@ -121,7 +121,7 @@ class WebhookController < ApplicationController
   end
 
   def pengelola_sambutan(permintaan)
-    kirim_pesan(permintaan.kodepos, buat_pesan_terstruktur(:text, PesanBalasan.sambut))
+    kirim_pesan(permintaan.kodepos, buat_pesan_terstruktur(:text, PesanBalasan.sambut(permintaan.pendaftar)))
   end
 
   def pengelola_postback(permintaan)

@@ -44,7 +44,7 @@ module PesanBalasan
     def bentuk_balasan(balasan)
       hasil = {:tulisan => "", :emot => ""}
       balasan.each do |gumpalan|
-        gumpalan.slice!(/\[(\w)+\s[\w\s\d\:\/\.]+\]/)
+        next unless gumpalan.match(/\[(\w)+\s[\w\s\d\:\/\.]+\]/)
         hasil[$1.downcase.to_sym] << gumpalan
         hasil[$1.downcase.to_sym] << ";"
       end
