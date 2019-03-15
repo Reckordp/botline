@@ -33,7 +33,7 @@ module PesanBalasan
 
     def balas(tulisan, pengirim)
       pesan = urai_pesan(tulisan)
-      pesan.map! { |psn| *pencarian_balasan(psn, pengirim) }
+      pesan.map! { |psn| pencarian_balasan(psn, pengirim) }
       return bentuk_balasan(pesan)
     end
 
@@ -43,10 +43,12 @@ module PesanBalasan
 
     def bentuk_balasan(balasan)
       hasil = {:tulisan => "", :emot => ""}
-      balasan.each do |gumpalan|
-        next unless gumpalan.match(/\[(\w)+\s[\w\s\d\:\/\.]+\]/)
-        hasil[$1.downcase.to_sym] << gumpalan
-        hasil[$1.downcase.to_sym] << ";"
+      balasan.each do |gumpalan_gj|
+        gumpalan_gj.each do |gumpalan|
+          next unless gumpalan.match(/\[(\w)+\s[\w\s\d\:\/\.]+\]/)
+          hasil[$1.downcase.to_sym] << gumpalan
+          hasil[$1.downcase.to_sym] << ";"
+        end
       end
       return hasil.values
     end
