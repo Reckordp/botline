@@ -27,14 +27,13 @@ module PesanBalasan
       Ingatan.buat_rancangan(Grup, bentuk_grup)
 
       bentuk_tugas = Ingatan::BentukPartikelRancangan.new
-      bentuk_tugas.tambah_jenis(:kodepos, :string)
       bentuk_tugas.tambah_jenis(:tugas, :string)
       Ingatan.buat_rancangan(Tugas, bentuk_tugas)
     end
 
-    def balas(event_pesan)
-      pesan = urai_pesan(event_pesan.pesan.tulisan)
-      pesan.map! { |pesan| pencarian_balasan(event_pesan, pesan) }
+    def balas(tulisan, pengirim)
+      pesan = urai_pesan(tulisan)
+      pesan.map! { |psn| pencarian_balasan(psn, pengirim) }
       return bentuk_balasan(pesan)
     end
 
@@ -43,21 +42,27 @@ module PesanBalasan
     end
 
     def bentuk_balasan(balasan)
-      return balasan.join("\n")
+      hasil = {:tulisan => "", :emot => ""}
+      balasan.each do |gumpalan|
+        gumpalan.slice!(/\[(\w)+\s[\w\s\d\:\/\.]+\]/)
+        hasil[$1.downcase.to_sym] << gumpalan
+        hasil[$1.downcase.to_sym] << ";"
+      end
+      return hasil.values
     end
 
-    def pencarian_balasan(event_pesan, pesan)
-      khusus = balasan_khusus(event_pesan, pesan)
+    def pencarian_balasan(pesan, pengirim)
+      khusus = balasan_khusus(pesan, pengirim)
       return khusus if khusus
-      umum = balasan_umum(event_pesan, pesan)
+      umum = balasan_umum(pesan, pengirim)
       return umum if umum
-      return "Gak ada enviromentnya..."
+      return buat_format_jenis(:tulisan, "Gak ada enviromentnya...")
     end
 
-    def balasan_umum(event_pesan, pesan)
+    def balasan_umum(pesan, pengirim)
       balas = []
-      balas << perintah(event_pesan.kodepos, pesan)
-      balas << sapaan(event_pesan.pengirim, pesan)
+      balas << perintah(pesan, pengirim)
+      balas << sapaan(pesan, pengirim.rincian.nama)
       balas << kepunyaan(pesan)
       balas << pujian(pesan)
       balas << curhat(pesan)
@@ -65,29 +70,28 @@ module PesanBalasan
       return balas.empty? ? nil : balas.first
     end
 
-    def perintah(kodepos, pesan)
+    def perintah(pesan, pengirim)
       case pesan
       when /TK\: DT/, /[Uu]pda?te?/, /[Pp]e?rba?ru?i?/, /[Bb]e?ri?ta?/, /[Ww]e?bsi?t?e?/, /[Ww]eb/
-        tambah_tugas(kodepos, :website)
-        "Aku tanya dulu..."
+        tambah_tugas(:website)
+        buat_format_jenis(:tulisan, "alamat: https://inscreat.herokuapp.com\n mengambil file...")
       when /TE\: ED/, /(.+) jawaba?n?nya (.+)/
-        tambah_enviroment(pengirim, $1, $2)
-        "Enviroment ditambahkan"
+        tambah_enviroment(pengirim.nomorinduk, $1, $2)
+        buat_format_jenis(:tulisan, "Enviroment ditambahkan")
       when /TK\: RM/, /[Rr]incian emot/, /[Ss]elidiki emot/, /[Nn]omor emot/
-        tambah_tugas(kodepos, :emot)
-        "Merekam..."
+        tambah_tugas(:emot)
+        buat_format_jenis(:tulisan, "Merekam...")
       end
     end
 
-    def sapaan(pengirim, pesan)
-      nama = pengirim.rincian.nama[0, 4]
+    def sapaan(pesan, nama_pengirim)
       case pesan
       when /[Hh]alo ?(\w*)/
-        format("%s %s", "Hai", (nama?($1) ? nama : ""))
+        buat_format_jenis(:tulisan, format("%s %s", "Hai", (nama?($1) ? nama_pengirim[0, 4] : "")))
       when /[Hh]ai ?(\w*)/
-        format("%s %s", "Halo", (nama?($1) ? nama : ""))
+        buat_format_jenis(:tulisan, format("%s %s", "Halo", (nama?($1) ? nama_pengirim[0, 4] : "")))
       when nama?(pesan)
-        nama
+        buat_format_jenis(:tulisan, nama_pengirim)
       end
     end
 
@@ -108,7 +112,7 @@ module PesanBalasan
         jawaban = bagian.jawaban.split(",")
       end
       return nil if jawaban.empty?
-      return jawaban[rand(jawaban.size)]
+      return buat_format_jenis(:tulisan, jawaban[rand(jawaban.size)])
     end
 
     def nama?(tulisan)
@@ -120,7 +124,6 @@ module PesanBalasan
 
     def tambah_tugas(kodepos, nama_tugas)
       selesai = ambil_bagian_kosong(Tugas) { |bagian| bagian.tugas.empty? }
-      selesai.kodepos = kodepos
       selesai.tugas = nama_tugas.to_s
       selesai.ubah_data
       return true
@@ -142,13 +145,16 @@ module PesanBalasan
     end
 
     def pesan_pembuka
-      return "Salam Kenal"
+      "Salam kenal"
     end
 
     def undangan_grup
+      "Salam kenal semuanya"
     end
 
-    def sambut
+    def sambut(anggota)
+      dasar_sambutan = "Halo %s, salam kenal ya"
+      anggota.map! { |i| format(dasar_sambutan, i.nama) } .join("\n")
     end
 
     def ambil_bagian_kosong(nama_rancangan)
@@ -163,5 +169,17 @@ module PesanBalasan
       return selesai
     end
   end
+
+  def buat_format_jenis(jenis, isi)
+    hsl = []
+    case jenis
+    when :tulisan
+      hsl << format("[%s %s]", "TULISAN", isi)
+    when :emot
+      hsl << format("[%s %d %d]", "EMOT", isi[:paket], isi[:nomor])
+    end
+    return hsl
+  end
+
   persiapan
 end
