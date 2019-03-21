@@ -52,11 +52,13 @@ module PenguraiEventLine
       end
     end
     class Dasar < ::PenguraiEventLine::DasarEvent
+      data :nomor
       data :jenis
       data :waktu
       data :pengirim
       def self.urai(gumpalan)
         saya = super
+        saya.nomor = gumpalan['id']
         saya.jenis = gumpalan['type']
         saya.waktu = gumpalan['timestamp']
         saya.pengirim = Pengirim.urai(gumpalan['source'])
