@@ -108,7 +108,7 @@ module PesanBalasan
     def kepunyaan(pesan)
       case pesan
       when /[Kk]enalan yuk/, /[Aa]ku mau kenalan/, /[Ss]iapa kamu [itu]{3}/
-        buat_format_jenis(:tulisan, INFOMASI_SAYA)
+        buat_format_jenis(:tulisan, INFORMASI_SAYA)
       end
     end
 
