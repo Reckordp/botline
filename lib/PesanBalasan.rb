@@ -1,5 +1,9 @@
 module PesanBalasan
   Pemilik = 'Uabc3a27c357d0ab0484c8c171ff0062f'
+  INFORMASI_SAYA = "Infomasi Saya\n BOT 1.0 botline-inscreat.herokuapp.com\n" \
+    " Mesosialisasikan kemajuan website\n Dalam tahap pengembangan\n" \
+    "\nPersyaratan\n Akun ini bersifat rahasia\n\n Dibuat 8 Maret 2019" \
+    " FreePlan\n\nSiap Bekerja."
 
   DAFTAR_BALASAN_UMUM = {
     :halo             =>      ["Iya?", "Apa?", "Hai"],
@@ -28,6 +32,7 @@ module PesanBalasan
 
       bentuk_tugas = Ingatan::BentukPartikelRancangan.new
       bentuk_tugas.tambah_jenis(:tugas, :string)
+      bentuk_tugas.tambah_jenis(:rincian, :string)
       Ingatan.buat_rancangan(Tugas, bentuk_tugas)
     end
 
@@ -77,12 +82,15 @@ module PesanBalasan
       when /TK\: DT/, /[Uu]pda?te?/, /[Pp]e?rba?ru?i?/, /[Bb]e?ri?ta?/, /[Ww]e?bsi?t?e?/, /[Ww]eb/
         tambah_tugas(:website)
         buat_format_jenis(:tulisan, "alamat: https://inscreat.herokuapp.com\n mengambil file...")
-      when /TE\: ED/, /(.+) jawaba?n?nya (.+)/
+      when /TE\: E (.+) D (.+)/, /(.+) jawaba?n?nya (.+)/
         tambah_enviroment(pengirim.nomorinduk, $1, $2)
         buat_format_jenis(:tulisan, "Enviroment ditambahkan")
       when /TK\: RM/, /[Rr]incian emot/, /[Ss]elidiki emot/, /[Nn]omor emot/
         tambah_tugas(:emot)
         buat_format_jenis(:tulisan, "Merekam...")
+      when /TK\: DM (\d+)/, /[Dd]iam (\d+)/
+        tambah_tugas(:diam, $1)
+        buat_format_jenis(:emot, {paket: 1, nomor: 3})
       end
     end
 
@@ -92,15 +100,23 @@ module PesanBalasan
         buat_format_jenis(:tulisan, format("%s %s", "Hai", (nama?($1) ? nama_pengirim[0, 4] : "")))
       when /[Hh]ai ?(\w*)/
         buat_format_jenis(:tulisan, format("%s %s", "Halo", (nama?($1) ? nama_pengirim[0, 4] : "")))
-      when nama?(pesan)
-        buat_format_jenis(:tulisan, nama_pengirim)
+      else
+        buat_format_jenis(:tulisan, nama_pengirim) if nama?(pesan)
       end
     end
 
     def kepunyaan(pesan)
+      case pesan
+      when /[Kk]enalan yuk/, /[Aa]ku mau kenalan/, /[Ss]iapa kamu [itu]{3}/
+        buat_format_jenis(:tulisan, INFOMASI_SAYA)
+      end
     end
 
     def pujian(pesan)
+      case pesan
+      when /[Bb]erguna juga/
+        buat_format_jenis(:tulisan, "Itukan karena kamu percaya sama aku")
+      end
     end
 
     def curhat(pesan)
@@ -124,9 +140,10 @@ module PesanBalasan
       return false
     end
 
-    def tambah_tugas(nama_tugas)
+    def tambah_tugas(nama_tugas, rincian = nil)
       selesai = ambil_bagian_kosong(Tugas) { |bagian| bagian.tugas.empty? }
       selesai.tugas = nama_tugas.to_s
+      selesai.rincian = rincian.to_s
       selesai.ubah_data
       return true
     end
@@ -139,7 +156,7 @@ module PesanBalasan
       bag = ambil_bagian_kosong(Dialog) do |bagian|
         bagian.user_id.empty? || bagian.pertanyaan == tanya
       end
-      bag.user_id = pengirim.nomorinduk
+      bag.user_id = nomorinduk
       bag.pertanyaan = tanya
       bag.jawaban = gumpalan_jawab
       bag.ubah_data
@@ -151,7 +168,8 @@ module PesanBalasan
     end
 
     def undangan_grup
-      "Salam kenal semuanya"
+      buat_format_jenis(:tulisan, "Salam kenal semuanya") + \
+      buat_format_jenis(:emot, {paket: 11537, nomor: 52002739})
     end
 
     def sambut(anggota)

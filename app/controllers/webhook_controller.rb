@@ -1,40 +1,6 @@
 class WebhookController < ApplicationController
-  # def menerima_pesan(pesan)
-  #   case pesan.type
-  #   when Line::Bot::Event::MessageType::Text
-  #     balas_pesan(pesan, PesanBalasan.buat_balasan(pesan))
-  #   when Line::Bot::Event::MessageType::Sticker
-  #     menerima_stiker(pesan)
-  #   end
-  # end
-
-  # def menerima_stiker(pesan)
-  #   msgapi = pesan.message['packageId'].to_i <= 4
-  #   messages = [{
-  #     type: 'text',
-  #     text: "[STICKER]\npackageId: #{pesan.message['packageId']}\nstickerId: #{pesan.message['stickerId']}"
-  #     }]
-  #
-  #   if msgapi
-  #     messages.push(
-  #       type: 'sticker',
-  #       packageId: pesan.message['packageId'],
-  #       stickerId: pesan.message['stickerId']
-  #     )
-  #   end
-  #   balas_konten(pesan, messages)
-  # end
-  #
-  # def balas_pesan(pesan, tulisan)
-  #   client.reply_message(pesan['replyToken'], { type: 'text', text: tulisan })
-  # end
-  #
-  # def balas_konten(pesan, konten)
-  #   client.push_message(pesan['replyToken'], konten)
-  # end
-
   TUGAS_PRIORITAS = %i[ website ]
-  TUGAS_KELANJUTAN = %i[ emot ]
+  TUGAS_KELANJUTAN = %i[ emot, diam ]
 
   def siapkan_alat_balas
     @penampungan = {}
@@ -117,7 +83,7 @@ class WebhookController < ApplicationController
   end
 
   def pengelola_diundang_grup(permintaan)
-    kirim_pesan(permintaan.kodepos, buat_pesan_terstruktur(:text, PesanBalasan.undangan_grup))
+    kirim_pesan_dari_gumpalan(permintaan.kodepos, PesanBalasan.undangan_grup)
   end
 
   def pengelola_sambutan(permintaan)
@@ -159,15 +125,25 @@ class WebhookController < ApplicationController
     case jenis_tugas
     when :website
       tugas_website(kodepos)
+      tugas.ulangi
+      tugas.ubah_data
     when :emot
+      tugas.ulangi
+      tugas.ubah_data
       a = @daftar_evtline.select { |i| i.is_a?(PenguraiEventLine::Pengurai::Message) } .map(&:pesan)
       a = a.find { |i| i.is_a?(PenguraiEventLine::Pengurai::Message::Sticker) }
       return kirim_pesan(kodepos, buat_pesan_terstruktur(:text, "Gak jadi merekam")) unless a
       @diam = true
       tugas_rekam_emot(kodepos, a)
+    when :diam
+      @diam = true
+      waktu = tugas.rincian.to_i - 1
+      tugas.rincian = waktu.to_s
+      return tugas.ubah_data unless waktu.zero?
+      @diam = false
+      tugas.ulangi
+      tugas.ubah_data
     end
-    tugas.ulangi
-    tugas.ubah_data
   end
 
   def tugas_website(kodepos)
@@ -188,7 +164,8 @@ class WebhookController < ApplicationController
   end
 
   def tugas_rekam_emot(kodepos, evt_sticker)
-    psn = format("Paket: %s\nUrutan: %s", evt_sticker.paket, evt_sticker.urutan)
+    pesan = "Hasil Rekaman:\n Paket: %s\n Urutan: %s"
+    psn = format(pesan, evt_sticker.paket, evt_sticker.urutan)
     kirim_pesan(kodepos, buat_pesan_terstruktur(:text, psn))
   end
 
@@ -204,7 +181,7 @@ class WebhookController < ApplicationController
         pengelola_pesan(permintaan)
       when PenguraiEventLine::Pengurai::Follow
         pengelola_ditambahkan(permintaan)
-      when PenguraiEventLine::Pengurai::Join, PenguraiEventLine::Pengurai::Leave
+      when PenguraiEventLine::Pengurai::Join#, PenguraiEventLine::Pengurai::Leave
         pengelola_diundang_grup(permintaan)
       when PenguraiEventLine::Pengurai::MemberJoined#, PenguraiEventLine::Pengurai::MemberLeft
         pengelola_sambutan(permintaan)
