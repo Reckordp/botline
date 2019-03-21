@@ -122,7 +122,7 @@ module PesanBalasan
     def curhat(pesan)
     end
 
-    def balasan_khusus(pengirim, pesan)
+    def balasan_khusus(pesan, pengirim)
       jawaban = []
       Ingatan.semua_bagian(Dialog).each do |bagian|
         next unless bagian.user_id == pengirim.nomorinduk
